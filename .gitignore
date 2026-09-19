@@ -1,0 +1,47 @@
+# Sensitive configuration (contains API keys)
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Large media outputs & generated assets (>100MB fails GitHub push)
+*.mp4
+*.wav
+*.mp3
+*.mov
+*.avi
+final_video_1080p.mp4
+final_voiceover.*
+sample_voiceover_chunks_1_to_6.mp3
+chunk_*.mp3
+comp_*.mp3
+
+# Generated project folders & audio chunks
+audio_chunks/
+audio_chunks_2min/
+audio_chunks_flash3/
+projects/
+
+# Scratch & temporary debug files
+scratch/
+
+# Chrome extension runtime databases
+*.ldb
+*.log
+LOCK
+LOG.old
+MANIFEST-*
+Chrome extension for flow/* 2/
+
+# macOS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Compiled native binaries (automatically rebuilt via ocr_helper.swift)
+ocr_helper

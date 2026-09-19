@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>ViralDNA Auto Flow</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">
+        <img src="../icons/logo-mark.png" alt="ViralDNA" class="logo-img">
+      </div>
+      <img src="../icons/wordmark.png" alt="ViralDNA" class="logo-wordmark">
+      <span class="logo-sub">Auto Flow</span>
+    </div>
+    <div class="header-right">
+      <!-- Duyuru zili: okunmadıysa kırmızı nokta yanar; tıklanınca söner ama duyuru
+           her zaman tekrar açılabilir kalır. -->
+      <button class="bell-btn" id="bell-btn" type="button" aria-label="Notifications">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="bell-dot" id="bell-dot"></span>
+      </button>
+      <div class="lang-select" id="lang-select">
+        <button class="lang-btn" id="lang-btn" title="Language">
+          <span class="lang-label" id="lang-label" data-i18n="lang_label">Language</span>
+          <span class="lang-flag" id="lang-flag"></span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+        </button>
+        <div class="lang-menu" id="lang-menu"></div>
+      </div>
+      <div class="status-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text" data-i18n="status_ready">Hazır</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sekme çubuğu (sabit — scroll ile gelmez) -->
+  <div class="tabbar" id="tabbar">
+    <button class="tab active" data-tab="control" type="button"><span data-i18n="tab_control">Text→Image</span></button>
+    <button class="tab" data-tab="i2v" type="button"><span data-i18n="tab_i2v">Foto→Video</span></button>
+    <button class="tab" data-tab="queue" type="button"><span data-i18n="tab_queue">Queue</span></button>
+    <button class="tab" data-tab="library" type="button"><span data-i18n="tab_library">Library</span></button>
+    <button class="tab" data-tab="logs" type="button"><span data-i18n="tab_logs">Logs</span><span class="tab-badge" id="logs-err-badge" style="display:none">0</span></button>
+  </div>
+
+  <!-- Body -->
+  <main class="body">
+
+    <!-- Tek tıkla puanlama (kalıcı kart, her zaman görünür) -->
+    <div class="rate-card" id="rate-card">
+      <div class="rate-stars" aria-hidden="true">
+        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      </div>
+      <div class="rate-txt">
+        <div class="rate-title" data-i18n="rate_title">Auto Flow işinizi kolaylaştırıyor mu?</div>
+        <div class="rate-sub" data-i18n="rate_sub">Tek tıkla 5 yıldız bırakın — daha fazla ücretsiz özellik geliştirmemize güç katın.</div>
+      </div>
+      <button class="rate-cta" id="rate-cta" type="button" data-i18n="rate_btn">Tek tıkla puanla</button>
+    </div>
+
+    <!-- Çapraz tanıtım: ücretsiz ViralDNA YouTube eklentisi (puanlama kartının hemen altı) -->
+    <div class="xp-card" id="xp-card">
+      <!-- "YENİ" rozeti: mutlak konumlu → flex akışına girmez, mevcut yerleşimi etkilemez -->
+      <span class="xp-new" data-i18n="xp_new">YENİ</span>
+      <!-- Kendi markamız kullanılır: YouTube logosu marka kuralları gereği kullanılmaz -->
+      <div class="xp-icon" aria-hidden="true">
+        <img src="../icons/logo-mark.png" alt="ViralDNA">
+      </div>
+      <div class="xp-txt">
+        <div class="xp-head"><span class="xp-badge" data-i18n="xp_badge">ÜCRETSİZ ARAÇLAR</span><span class="xp-title" data-i18n="xp_title">Thumbnail, etiketler, transkript ve saatlik izlenme: tek tıkla</span></div>
+        <div class="xp-sub" data-i18n="xp_sub">ViralDNA YouTube eklentisi.</div>
+      </div>
+      <button class="xp-cta" id="xp-cta" type="button" data-i18n="xp_btn">Ücretsiz ekle</button>
+    </div>
+
+    <!-- Hesap / Giriş -->
+    <div class="account-card" id="account-card">
+      <div class="acc-out" id="acc-out">
+        <button class="btn-google" id="btn-google">
+          <svg class="g-icon" width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+            <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+            <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+            <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+          </svg>
+          <span data-i18n="acc_sign_in">Google ile giriş yap</span>
+        </button>
+        <div class="acc-note" data-i18n="acc_free_note">Giriş yapmadan günde en fazla 20 görsel/video üretebilirsiniz.</div>
+      </div>
+      <div class="acc-in" id="acc-in" style="display:none">
+        <button class="acc-avatar-btn" id="acc-avatar-btn" title="Hesap" aria-haspopup="true">
+          <div class="acc-avatar" id="acc-avatar"></div>
+        </button>
+        <div class="acc-menu" id="acc-menu" style="display:none">
+          <div class="acc-menu-head">
+            <div class="acc-email" id="acc-email"></div>
+            <div class="acc-sub">
+              <span class="acc-plan" id="acc-plan"></span>
+              <span class="acc-usage" id="acc-usage"></span>
+            </div>
+          </div>
+          <button class="acc-upgrade" id="btn-upgrade" data-i18n="acc_upgrade" style="display:none">Upgrade to Pro</button>
+          <button class="acc-signout-row" id="btn-signout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span data-i18n="acc_sign_out">Çıkış yap</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bağlantı -->
+    <div class="conn-card" id="conn-card">
+      <div class="conn-icon" id="conn-icon"></div>
+      <div class="conn-info">
+        <div class="conn-title" id="conn-title" data-i18n="conn_searching">Aranıyor...</div>
+        <div class="conn-sub"   id="conn-sub"></div>
+      </div>
+      <button class="conn-btn" id="conn-btn" data-i18n="conn_open_btn" style="display:none">Aç</button>
+    </div>
+
+    <div id="notif-wrap"></div>
+
+    <!-- ════ CONTROL sekmesi ════ -->
+    <div class="tab-panel active" data-panel="control">
+
+    <!-- Bilgi Kartı (temiz proje) — en üstte -->
+    <div class="info-card info-top">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <line x1="12" y1="11" x2="12" y2="16"/>
+        <line x1="9.5" y1="13.5" x2="14.5" y2="13.5"/>
+      </svg>
+      <span data-i18n-html="info_fresh_project"><strong>Temiz proje önerisi:</strong> Her akışı yeni ve boş bir <strong>Google Flow</strong> projesinde başlatmanız en sağlıklı sonucu verir.</span>
+    </div>
+
+    <!-- Bilgi Kartı (tüm kartları oku) — kırmızı, dikkat çekici -->
+    <div class="info-card info-read">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <span data-i18n-html="info_read_cards"><strong>Önemli:</strong> Eklentinin en sağlıklı şekilde çalışması için ilerlerken eklenti içindeki <strong>tüm bilgi kartlarını okuyun.</strong></span>
+    </div>
+
+    <!-- Üretim Ayarları (Flow'dan canlı okunur) -->
+    <div class="card gen-card" id="gen-card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_gensettings">ÜRETİM AYARLARI</div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_mode">TÜR</div>
+        <div class="seg" id="gen-mode-group">
+          <button class="seg-btn active" data-mode="IMAGE" data-i18n="mode_image">Görsel</button>
+          <button class="seg-btn" data-mode="VIDEO" data-i18n="mode_video">Video</button>
+        </div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_model">MODEL</div>
+        <div class="gen-select-wrap">
+          <select id="gen-model" class="gen-select"><option value="">—</option></select>
+        </div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_aspect">ORAN</div>
+        <div class="seg seg-wrap" id="gen-aspect-group"></div>
+      </div>
+
+      <div class="gen-field" id="gen-resolution-field" style="display:none">
+        <div class="gen-label" data-i18n="label_resolution">ÇÖZÜNÜRLÜK</div>
+        <div class="seg seg-wrap" id="gen-resolution-group"></div>
+      </div>
+
+      <div class="gen-field" id="gen-duration-field" style="display:none">
+        <div class="gen-label" data-i18n="label_duration">SÜRE</div>
+        <div class="seg seg-wrap" id="gen-duration-group"></div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_count">ADET</div>
+        <div class="seg seg-wrap" id="gen-count-group"></div>
+      </div>
+    </div>
+
+    <!-- Referans -->
+    <div class="card ref-card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_reference">REFERANS</div>
+        <span class="card-meta" id="ref-meta"></span>
+      </div>
+
+      <div class="seg" id="ref-mode-group">
+        <button class="seg-btn active" data-refmode="shared" data-i18n="ref_mode_shared">Ortak Referans</button>
+        <button class="seg-btn" data-refmode="map" data-i18n="ref_mode_map">Prompt Başına Eşle</button>
+      </div>
+
+      <!-- Shared (ortak) panel -->
+      <div id="ref-shared-panel">
+        <div class="ref-grid" id="shared-ref-grid"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span data-i18n-html="ref_shared_hint">Buradaki referanslar <strong>her prompt'a</strong> eklenir. En fazla 10 görsel.</span>
+        </div>
+      </div>
+
+      <!-- Map (prompt başına) panel -->
+      <div id="ref-map-panel" style="display:none">
+        <button class="btn-block" id="btn-open-map" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          <span data-i18n="ref_mode_map">Prompt Başına Eşle</span>
+        </button>
+        <div class="map-summary" id="map-summary"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span data-i18n-html="ref_map_hint">Her prompt'a <strong>Library</strong>'den ayrı referans atayın. Önce Library'ye görsel + tag ekleyin.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt Listesi -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_prompts">PROMPT LİSTESİ</div>
+        <div class="card-head-right">
+          <button class="txt-upload-btn" id="btn-prompt-upload" type="button" data-i18n-title="prompt_upload_txt" title="Upload .txt">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9 15 12 12 15 15"/>
+            </svg>
+            <span data-i18n="prompt_upload_label">.txt</span>
+          </button>
+          <span class="card-meta"><span id="line-count">0</span> <span data-i18n="prompts_suffix">prompt</span></span>
+        </div>
+        <input type="file" id="prompt-file-input" accept=".txt,text/plain" style="display:none">
+      </div>
+      <textarea id="prompt-input" class="prompt-box" data-i18n-ph="prompt_placeholder"
+        placeholder="Her satıra bir prompt yazın...
+
+A breathtaking sunset over ocean waves
+A futuristic city at night with neon lights
+Portrait of an ancient wizard"></textarea>
+      <div class="info-card">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="info_prompts">Her satır <strong>ayrı bir prompt</strong> olarak algılanır. Zaman damgalı indirmek için her promptun <strong>başına zaman damgası</strong> ekleyin.</span>
+      </div>
+    </div>
+
+    <!-- Oto İndirme -->
+    <div class="card dl-card">
+      <div class="card-head">
+        <div class="card-title dl-title" data-i18n="card_autodownload">OTO İNDİRME</div>
+        <label class="toggle toggle-lg">
+          <input type="checkbox" id="chk-download">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </div>
+      <!-- Kalite seçimi: HER ZAMAN görünür (oto indirme + "sonradan indir" ortak kullanır) -->
+      <div class="dl-row">
+        <span class="field-label" data-i18n="label_image">Görsel</span>
+        <div class="quality-chips" id="img-quality-group">
+          <button class="qchip active" data-q="1k">1K</button>
+          <button class="qchip" data-q="2k">2K</button>
+          <button class="qchip" data-q="4k">4K</button>
+        </div>
+      </div>
+      <div class="dl-row">
+        <span class="field-label" data-i18n="label_video">Video</span>
+        <div class="quality-chips" id="vid-quality-group">
+          <button class="qchip" data-q="270p">270p</button>
+          <button class="qchip active" data-q="720p">720p</button>
+          <button class="qchip" data-q="1080p">1080p</button>
+          <button class="qchip" data-q="4k-v">4K</button>
+        </div>
+      </div>
+      <!-- v149 KAYIT KLASORU - oto indirme ve "Sonradan indir" ORTAK kullanir -->
+      <div class="dl-folder">
+        <span class="gen-label" data-i18n="label_dl_folder">Kayıt klasörü</span>
+        <input type="text" class="dl-folder-input" id="dl-folder" maxlength="80"
+               spellcheck="false" autocomplete="off"
+               data-i18n-ph="ph_dl_folder" placeholder="Örn: Projem/Sahne1">
+        <label class="dl-folder-dated">
+          <input type="checkbox" id="dl-folder-dated" checked>
+          <span data-i18n="label_dl_dated">Her akış için tarihli klasör</span>
+        </label>
+        <div class="dl-folder-path" id="dl-folder-path"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          <span data-i18n-html="info_dl_folder">Dosyalar tarayıcınızın <strong>İndirilenler</strong> klasörüne kaydedilir.</span>
+        </div>
+      </div>
+      <!-- v150 DOSYA ADI: numarali / prompt / zaman damgali -->
+      <div class="dl-naming">
+        <span class="gen-label" data-i18n="label_dl_naming">Dosya adı</span>
+        <div class="seg seg-wrap" id="dl-naming-group">
+          <button class="seg-btn active" data-name="num" data-i18n="naming_num">Numaralı</button>
+          <button class="seg-btn" data-name="prompt" data-i18n="naming_prompt">Prompt</button>
+          <button class="seg-btn" data-name="time" data-i18n="naming_time">Zaman damgası</button>
+          <button class="seg-btn" data-name="numtime" data-i18n="naming_numtime">Numara + damga</button>
+        </div>
+        <!-- v175 BASLANGIC NUMARASI: parca parca gonderimde numara kaldigi yerden devam eder -->
+        <label class="dl-startnum">
+          <span data-i18n="label_dl_startnum">Başlangıç numarası</span>
+          <input type="number" class="dl-startnum-input" id="dl-startnum" min="1" max="99999" step="1"
+                 inputmode="numeric" autocomplete="off" value="1">
+        </label>
+        <div class="dl-startnum-hint"><span data-i18n-html="info_dl_startnum">Listeyi parça parça gönderiyorsanız bu parçanın ilk numarasını yazın (örnek <strong>41</strong>).</span></div>
+        <div class="info-card info-read dl-naming-warn" id="dl-naming-warn" style="display:none"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 9v11"/>
+          </svg>
+          <span data-i18n-html="info_dl_naming">Numaralı seçilirse dosya adı kaçıncı prompt olduğunu gösterir; Prompt ve Zaman damgası seçilirse dosya <strong>doğrudan o adla</strong> iner.</span>
+        </div>
+      </div>
+      <div id="dl-opts" style="display:none">
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span data-i18n-html="info_download">İndirilenlerin doğru sırada olması için bir görselin indirilmesi <strong>tamamlandıktan sonra</strong> diğerine geçilir. <strong>Yüksek çözünürlükte</strong> indirecekseniz (görselde 2K/4K, videoda 1080p), numaralandırmanın en sağlıklı çalışması için üretim bittikten sonra aşağıdaki <strong>"Sonradan indir"</strong> ile toplu indirmenizi öneririz.</span>
+        </div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <span data-i18n-html="info_visible">İndirme yalnızca <strong>Flow sekmesi ekranda görünürken</strong> çalışır. Çift ekranda Flow'u diğer ekrana alın; tek ekranda pencereleri küçültüp Flow'u görünür bırakın; kesintisiz devam eder.</span>
+        </div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span data-i18n-html="info_autozoom">Oto indirme açıkken akış başlatıldığında sayfa yakınlığı geçici olarak <strong>%33'e</strong> çekilir. Bunun sebebi, üretilen tüm görsellerin aynı anda ekrana sığması ve indirme sırasının <strong>asla karışmamasıdır</strong>. İndirme tamamlandığında veya durdurulduğunda yakınlık otomatik olarak <strong>%100'e</strong> geri döner.</span>
+        </div>
+      </div>
+      <!-- Oto indirme aktifken: tek başına durdurma (üretim bitince Durdur/Duraklat kaybolur) -->
+      <button class="btn-stop-autodl" id="btn-stop-autodl" type="button" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+        <span data-i18n="btn_stop_autodl">Oto indirmeyi durdur</span>
+      </button>
+    </div>
+
+    <!-- Sonradan İndir (manuel, oto indirmeden AYRI) -->
+    <div class="card dl-later-card">
+      <div class="card-head">
+        <div class="card-title dl-later-title" data-i18n="card_download_later">SONRADAN İNDİR</div>
+      </div>
+      <button class="btn-download-later" id="btn-download-later" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-i18n="btn_download_later">Üretilenleri indir (seçili çözünürlükle)</span>
+      </button>
+      <div class="info-card info-warn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="info_download_later">Bu butona basmadan önce galeriyi <strong>en alta kadar</strong> kaydırın — ilk indirilmesi gereken görsel/video ekranda görünür olmalı. Sonra yukarıda <strong>seçili çözünürlükle</strong>, en eskiden başlayıp sırayla, doğru numaralandırmayla indirir.</span>
+      </div>
+    </div>
+
+    <!-- Bekleme Süresi -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_interval">BEKLEME SÜRESİ</div>
+        <span class="card-meta" data-i18n="interval_meta">Promptlar arası</span>
+      </div>
+      <div class="interval-row">
+        <button class="interval-step" id="btn-minus">−</button>
+        <div class="interval-display">
+          <input type="number" id="interval-input" value="1" min="1" max="300">
+          <span class="interval-unit" data-i18n="seconds">saniye</span>
+        </div>
+        <button class="interval-step" id="btn-plus">+</button>
+      </div>
+      <div class="quick-chips">
+        <button class="qchip active" data-s="1">1s</button>
+        <button class="qchip" data-s="30">30s</button>
+        <button class="qchip" data-s="60">1dk</button>
+        <button class="qchip" data-s="90">90s</button>
+        <button class="qchip" data-s="120">2dk</button>
+      </div>
+      <!-- "Olağan dışı etkinlik" hatası bilgi kartı (kırmızı) -->
+      <div class="info-card info-read">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="info_unusual_activity">Google'da <strong>"olağan dışı etkinlik algılandı"</strong> uyarısı alırsanız bu <strong>eklentiden kaynaklanmaz</strong>; Google'ın Chrome üzerindeki güvenlik kontrolüdür. Bu uyarı <strong>Chrome</strong> tarayıcısında çok daha sık görülür. Kesin çözüm için <strong>Microsoft Edge</strong> tarayıcısına geçmenizi öneririz; eklenti Edge'de sorunsuz çalışır ve bu uyarı neredeyse hiç çıkmaz.</span>
+      </div>
+    </div>
+
+    <!-- İlerleme -->
+    <div class="prog-card" id="prog-card" style="display:none">
+      <div class="prog-head">
+        <div class="prog-label">
+          <span class="prog-pulse" id="prog-pulse"></span>
+          <span data-i18n="card_progress">İLERLEME</span>
+        </div>
+        <span class="prog-frac" id="prog-frac">0 / 0</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-current" id="prog-current"></div>
+      <div class="prog-eta"     id="prog-eta"></div>
+    </div>
+
+    <!-- Diğer ürünler -->
+    <a class="discover-card" href="https://viraldna.io" target="_blank" rel="noopener noreferrer">
+      <div class="discover-ic">
+        <img src="../icons/logo-mark.png" alt="ViralDNA">
+      </div>
+      <div class="discover-txt">
+        <div class="discover-title" data-i18n="discover_title">Discover our other products</div>
+        <div class="discover-sub">viraldna.io</div>
+      </div>
+      <svg class="discover-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+
+    <!-- Destek -->
+    <div class="support-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span data-i18n="support_label">Need help?</span>
+      <a href="mailto:support@viraldna.io">support@viraldna.io</a>
+    </div>
+
+    </div><!-- /CONTROL -->
+
+    <!-- ════ GÖRSELDEN VİDEO (I2V) sekmesi ════ -->
+    <div class="tab-panel" data-panel="i2v">
+
+    <!-- Görselden Video (I2V) -->
+    <div class="card i2v-card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_i2v">GÖRSELDEN VİDEO</div>
+      </div>
+
+      <div class="info-card">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="i2v_hint"></span>
+      </div>
+
+      <!-- 20'ŞERLİ PARTİ + video-only indirme bilgisi -->
+      <div class="info-card info-warn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span data-i18n-html="i2v_batch_info"></span>
+      </div>
+
+      <button class="btn-block" id="btn-i2v-add" type="button" style="margin-top:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+        </svg>
+        <span data-i18n="i2v_add_images">Görsel Ekle</span>
+      </button>
+      <input type="file" id="i2v-file-input" accept="image/*,.jpg,.jpeg,.jpe,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff" multiple style="display:none">
+
+      <div class="gen-field" style="margin-top:10px">
+        <div class="gen-label" data-i18n="i2v_sort">SIRALAMA</div>
+        <div class="gen-select-wrap">
+          <select id="i2v-sort" class="gen-select">
+            <option value="added" data-i18n="i2v_sort_added">Ekleme sırası</option>
+            <option value="name-asc" data-i18n="i2v_sort_name_asc">Ada göre (A-Z)</option>
+            <option value="name-desc" data-i18n="i2v_sort_name_desc">Ada göre (Z-A)</option>
+            <option value="date-asc" data-i18n="i2v_sort_date_old">Tarihe göre (önce en eski)</option>
+            <option value="date-desc" data-i18n="i2v_sort_date_new">Tarihe göre (önce en yeni)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="i2v-list" id="i2v-list"></div>
+      <!-- Toplu kaldırma: SON GÖRSELİN hemen altında, sağa yaslı. Kartın flex akışında
+           DOĞRUDAN çocuk → gizlendiğinde hiç yer (ve gap) kaplamaz. -->
+      <button class="lib-clear-btn i2v-clear-btn" id="btn-i2v-clear" type="button" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <span data-i18n="i2v_clear_all">Tümünü Kaldır</span>
+      </button>
+      <div class="i2v-pager" id="i2v-pager" style="display:none"></div>
+
+      <!-- GÖRSEL KULLANIMI: Flow'un video kompozisyonunda İKİ ayrı yol var.
+           Kareler   → görsel videonun başlangıç (ve isteğe bağlı bitiş) KARESİ olur;
+                       fotoğrafın kendisi canlanır. Picker'ı Başlat/Bitiş yuvaları açar.
+           Malzemeler → görsel prompt'a REFERANS olarak eklenir; Flow onu örnek alıp yeni
+                       sahne üretir. Picker'ı kompozisyondaki "+" açar (v115'ten beri
+                       çalışan, kanıtlı yol → varsayılan budur).
+           Eşleme alt grubu yalnız Kareler'de anlamlıdır, o yüzden ona bağlı gizlenir. -->
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="i2v_use_label">GÖRSEL KULLANIMI</div>
+        <div class="seg" id="i2v-use-group"></div>
+      </div>
+
+      <div class="gen-field" id="i2v-pair-field" style="display:none">
+        <div class="gen-label" data-i18n="i2v_pair_label">EŞLEME</div>
+        <div class="seg seg-wrap" id="i2v-pair-group"></div>
+      </div>
+
+      <!-- Seçili modun ne yapacağını ve kaç prompt satırı gerektiğini CANLI anlatır -->
+      <div class="i2v-pair-note" id="i2v-pair-note"></div>
+
+      <!-- "X görsel · Y prompt" sayacı PROMPT KUTUSUNUN hemen üstünde -->
+      <span class="card-meta i2v-meta-line" id="i2v-meta"></span>
+      <!-- Sayaç KIRMIZIYA döndüğünde (sayılar tutmuyor) hemen ALTINDA ne yapılacağını
+           adım adım söyler: kaç satır fazla/eksik, kaç satır silinecek/yazılacak.
+           Sayılar tuttuğunda gizlenir → flex öğesi olmadığı için boşluk da bırakmaz. -->
+      <div class="i2v-fix-hint" id="i2v-fix-hint" style="display:none"></div>
+      <textarea id="i2v-prompts" class="prompt-box i2v-prompts" data-i18n-ph="i2v_prompts_ph"
+        placeholder="Her satıra bir video promptu..."></textarea>
+
+      <div class="gen-field" style="margin-top:10px">
+        <div class="gen-label" data-i18n="label_model">MODEL</div>
+        <div class="gen-select-wrap">
+          <select id="i2v-model" class="gen-select"></select>
+        </div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_aspect">ORAN</div>
+        <div class="seg seg-wrap" id="i2v-aspect-group"></div>
+      </div>
+
+      <div class="gen-field" id="i2v-resolution-field">
+        <div class="gen-label" data-i18n="label_resolution">ÇÖZÜNÜRLÜK</div>
+        <div class="seg seg-wrap" id="i2v-resolution-group"></div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_duration">SÜRE</div>
+        <div class="seg seg-wrap" id="i2v-duration-group"></div>
+      </div>
+
+      <div class="gen-field">
+        <div class="gen-label" data-i18n="label_count">ADET</div>
+        <div class="seg seg-wrap" id="i2v-count-group"></div>
+      </div>
+
+      <button class="btn-block" id="btn-i2v-build" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        <span data-i18n="i2v_build">Kuyruğu Hazırla</span>
+      </button>
+      <!-- "Kuyruk hazır" mesajı BUTONUN HEMEN ALTINDA çıkar (üstteki genel bildirimde değil) -->
+      <div class="i2v-build-status" id="i2v-build-status" style="display:none"></div>
+    </div>
+
+    <!-- Oto İndirme (Control sekmesindekiyle senkron kopya) -->
+    <div class="card dl-card">
+      <div class="card-head">
+        <div class="card-title dl-title" data-i18n="card_autodownload">OTO İNDİRME</div>
+        <label class="toggle toggle-lg">
+          <input type="checkbox" id="chk-download-i2v">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div class="dl-row">
+        <span class="field-label" data-i18n="label_image">Görsel</span>
+        <div class="quality-chips" id="img-quality-group-i2v">
+          <button class="qchip active" data-q="1k">1K</button>
+          <button class="qchip" data-q="2k">2K</button>
+          <button class="qchip" data-q="4k">4K</button>
+        </div>
+      </div>
+      <div class="dl-row">
+        <span class="field-label" data-i18n="label_video">Video</span>
+        <div class="quality-chips" id="vid-quality-group-i2v">
+          <button class="qchip" data-q="270p">270p</button>
+          <button class="qchip active" data-q="720p">720p</button>
+          <button class="qchip" data-q="1080p">1080p</button>
+          <button class="qchip" data-q="4k-v">4K</button>
+        </div>
+      </div>
+      <!-- v149 KAYIT KLASORU - oto indirme ve "Sonradan indir" ORTAK kullanir -->
+      <div class="dl-folder">
+        <span class="gen-label" data-i18n="label_dl_folder">Kayıt klasörü</span>
+        <input type="text" class="dl-folder-input" id="dl-folder-i2v" maxlength="80"
+               spellcheck="false" autocomplete="off"
+               data-i18n-ph="ph_dl_folder" placeholder="Örn: Projem/Sahne1">
+        <label class="dl-folder-dated">
+          <input type="checkbox" id="dl-folder-dated-i2v" checked>
+          <span data-i18n="label_dl_dated">Her akış için tarihli klasör</span>
+        </label>
+        <div class="dl-folder-path" id="dl-folder-path-i2v"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          <span data-i18n-html="info_dl_folder">Dosyalar tarayıcınızın <strong>İndirilenler</strong> klasörüne kaydedilir.</span>
+        </div>
+      </div>
+      <!-- v150 DOSYA ADI: numarali / prompt / zaman damgali -->
+      <div class="dl-naming">
+        <span class="gen-label" data-i18n="label_dl_naming">Dosya adı</span>
+        <div class="seg seg-wrap" id="dl-naming-group-i2v">
+          <button class="seg-btn active" data-name="num" data-i18n="naming_num">Numaralı</button>
+          <button class="seg-btn" data-name="prompt" data-i18n="naming_prompt">Prompt</button>
+          <button class="seg-btn" data-name="time" data-i18n="naming_time">Zaman damgası</button>
+          <button class="seg-btn" data-name="numtime" data-i18n="naming_numtime">Numara + damga</button>
+        </div>
+        <!-- v175 BASLANGIC NUMARASI: parca parca gonderimde numara kaldigi yerden devam eder -->
+        <label class="dl-startnum">
+          <span data-i18n="label_dl_startnum">Başlangıç numarası</span>
+          <input type="number" class="dl-startnum-input" id="dl-startnum-i2v" min="1" max="99999" step="1"
+                 inputmode="numeric" autocomplete="off" value="1">
+        </label>
+        <div class="dl-startnum-hint"><span data-i18n-html="info_dl_startnum">Listeyi parça parça gönderiyorsanız bu parçanın ilk numarasını yazın (örnek <strong>41</strong>).</span></div>
+        <div class="info-card info-read dl-naming-warn" id="dl-naming-warn-i2v" style="display:none"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 9v11"/>
+          </svg>
+          <span data-i18n-html="info_dl_naming">Numaralı seçilirse dosya adı kaçıncı prompt olduğunu gösterir; Prompt ve Zaman damgası seçilirse dosya <strong>doğrudan o adla</strong> iner.</span>
+        </div>
+      </div>
+      <div id="dl-opts-i2v" style="display:none">
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span data-i18n-html="info_download">İndirilenlerin doğru sırada olması için bir görselin indirilmesi <strong>tamamlandıktan sonra</strong> diğerine geçilir.</span>
+        </div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <span data-i18n-html="info_visible">İndirme yalnızca <strong>Flow sekmesi ekranda görünürken</strong> çalışır.</span>
+        </div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span data-i18n-html="info_autozoom">Oto indirme açıkken akış başlatıldığında sayfa yakınlığı geçici olarak <strong>%33'e</strong> çekilir.</span>
+        </div>
+      </div>
+      <button class="btn-stop-autodl" id="btn-stop-autodl-i2v" type="button" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+        <span data-i18n="btn_stop_autodl">Oto indirmeyi durdur</span>
+      </button>
+    </div>
+
+    <!-- Sonradan İndir (Control sekmesindekiyle senkron kopya) -->
+    <div class="card dl-later-card">
+      <div class="card-head">
+        <div class="card-title dl-later-title" data-i18n="card_download_later">SONRADAN İNDİR</div>
+      </div>
+      <button class="btn-download-later" id="btn-download-later-i2v" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-i18n="btn_download_later">Üretilenleri indir (seçili çözünürlükle)</span>
+      </button>
+      <div class="info-card info-warn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="info_download_later">Bu butona basmadan önce galeriyi <strong>en alta kadar</strong> kaydırın.</span>
+      </div>
+    </div>
+
+    <!-- Bekleme Süresi (Control sekmesindekiyle senkron kopya) -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" data-i18n="card_interval">BEKLEME SÜRESİ</div>
+        <span class="card-meta" data-i18n="interval_meta">Promptlar arası</span>
+      </div>
+      <div class="interval-row">
+        <button class="interval-step" id="btn-minus-i2v">−</button>
+        <div class="interval-display">
+          <input type="number" id="interval-input-i2v" value="1" min="1" max="300">
+          <span class="interval-unit" data-i18n="seconds">saniye</span>
+        </div>
+        <button class="interval-step" id="btn-plus-i2v">+</button>
+      </div>
+      <div class="quick-chips">
+        <button class="qchip active" data-s="1">1s</button>
+        <button class="qchip" data-s="30">30s</button>
+        <button class="qchip" data-s="60">1dk</button>
+        <button class="qchip" data-s="90">90s</button>
+        <button class="qchip" data-s="120">2dk</button>
+      </div>
+      <!-- "Olağan dışı etkinlik" hatası bilgi kartı (kırmızı) -->
+      <div class="info-card info-read">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span data-i18n-html="info_unusual_activity">Google'da <strong>"olağan dışı etkinlik algılandı"</strong> uyarısı alırsanız bu <strong>eklentiden kaynaklanmaz</strong>; Google'ın Chrome üzerindeki güvenlik kontrolüdür.</span>
+      </div>
+    </div>
+
+    <!-- Diğer ürünler (Control sekmesindekiyle aynı) -->
+    <a class="discover-card" href="https://viraldna.io" target="_blank" rel="noopener noreferrer">
+      <div class="discover-ic">
+        <img src="../icons/logo-mark.png" alt="ViralDNA">
+      </div>
+      <div class="discover-txt">
+        <div class="discover-title" data-i18n="discover_title">Discover our other products</div>
+        <div class="discover-sub">viraldna.io</div>
+      </div>
+      <svg class="discover-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+
+    </div><!-- /I2V -->
+
+    <!-- ════ QUEUE sekmesi ════ -->
+    <div class="tab-panel" data-panel="queue">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title" data-i18n="card_queue">PROMPT KUYRUĞU</div>
+          <div class="lib-head-btns">
+            <div class="queue-summary" id="queue-summary"></div>
+            <button class="lib-clear-btn" id="btn-queue-clear" type="button" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span data-i18n="queue_clear_all">Temizle</span>
+            </button>
+          </div>
+        </div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span data-i18n="info_queue">Her prompt'un durumu: sırada, gönderiliyor, gönderildi, indirildi (yeşil), inmedi ya da atlandı (kırmızı). İndirme yapıldıysa satır numarası dosya numarasıdır.</span>
+        </div>
+        <div class="queue-list" id="queue-list"></div>
+      </div>
+    </div><!-- /QUEUE -->
+
+    <!-- ════ LIBRARY sekmesi ════ -->
+    <div class="tab-panel" data-panel="library">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title" data-i18n="card_library">LIBRARY</div>
+          <div class="lib-head-btns">
+            <button class="lib-clear-btn" id="btn-lib-clear" type="button" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span data-i18n="lib_clear_all">Tümünü Temizle</span>
+            </button>
+            <button class="lib-upload-btn" id="btn-lib-upload" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+              </svg>
+              <span data-i18n="lib_upload">Yükle</span>
+            </button>
+          </div>
+        </div>
+        <input type="file" id="lib-file-input" accept="image/*,.jpg,.jpeg,.jpe,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff" multiple style="display:none">
+        <div class="lib-grid" id="lib-grid"></div>
+        <div class="info-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;margin-top:1px">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+          <span data-i18n-html="lib_hint">Her görselin altına <strong>tag</strong> yazın (ör. <code>@hero</code>, <code>cat</code>). Map ekranında <strong>Auto-Tag</strong> bu tag'leri promptlarda arar.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ LOGS sekmesi ════ -->
+    <div class="tab-panel" data-panel="logs">
+      <div class="card">
+        <div class="card-head">
+          <div class="logs-filters">
+            <button class="logs-filter active" data-logf="all" type="button"><span data-i18n="logs_all">All</span> <b id="logs-count-all">0</b></button>
+            <button class="logs-filter" data-logf="errors" type="button"><span data-i18n="logs_errors">Errors</span> <b id="logs-count-err">0</b></button>
+            <button class="logs-filter" data-logf="activity" type="button"><span data-i18n="logs_activity">Activity</span> <b id="logs-count-act">0</b></button>
+          </div>
+          <div class="logs-actions">
+            <button class="btn-dl-all" id="logs-download" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span data-i18n="logs_download">Logları İndir</span>
+            </button>
+            <button class="logs-act" id="logs-copy" type="button" data-i18n-title="logs_copy" title="Copy">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="logs-act" id="logs-clear" type="button" data-i18n-title="logs_clear" title="Clear">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <input type="text" class="logs-search" id="logs-search" data-i18n-ph="logs_search" placeholder="Search logs...">
+        <div class="logs-list" id="logs-list"></div>
+        <div class="gallery-empty" id="logs-empty" data-i18n="logs_empty">Henüz kayıt yok.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div id="footer-idle">
+      <button class="btn-start" id="btn-start" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <span data-i18n="btn_start">Akışı Başlat</span>
+      </button>
+    </div>
+    <div id="footer-running" style="display:none" class="footer-duo">
+      <button class="btn-pause" id="btn-pause">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span>Duraklat</span>
+      </button>
+      <button class="btn-stop" id="btn-stop">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        <span data-i18n="btn_stop">Durdur</span>
+      </button>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Map per Prompt modalı -->
+<div class="modal-overlay" id="map-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" data-i18n="map_title">Referansları Promptlara Eşle</div>
+      <button class="modal-close" id="map-close-x" type="button" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-tools">
+      <button class="modal-tool" id="map-autotag" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
+        <span data-i18n="map_autotag">Auto-Tag</span>
+      </button>
+      <button class="modal-tool danger" id="map-clear" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        <span data-i18n="map_clear">Temizle</span>
+      </button>
+      <span class="map-count" id="map-count"></span>
+    </div>
+    <div class="modal-body" id="map-rows"></div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="map-cancel" type="button" data-i18n="map_cancel">İptal</button>
+      <button class="btn-primary" id="map-save" type="button" data-i18n="map_save">Eşlemeyi Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Library seçici (map satırı için) -->
+<div class="modal-overlay" id="libpick-overlay" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title" data-i18n="libpick_title">Library'den Seç</div>
+      <button class="modal-close" id="libpick-close-x" type="button" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body libpick-body" id="libpick-grid"></div>
+  </div>
+</div>
+
+<!-- Duyuru modalı -->
+<div class="modal-overlay" id="notice-overlay" style="display:none">
+  <div class="modal notice-modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="notice-ico" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </span>
+        <span data-i18n="notice_title">Duyuru</span>
+      </div>
+      <button class="modal-close" id="notice-close-x" type="button" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body notice-body" id="notice-body" data-i18n-html="notice_body"></div>
+    <div class="modal-foot notice-foot">
+      <a class="notice-rate" id="notice-rate" href="#" target="_blank" rel="noopener" data-i18n="notice_rate">Chrome Web Store'da 5 yıldız ver</a>
+      <button class="notice-ok" id="notice-ok" type="button" data-i18n="notice_ok">Anladım</button>
+    </div>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="i18n.js"></script>
+<script src="../auth/supabase-auth.js"></script>
+<script src="sidepanel.js"></script>
+</body>
+</html>

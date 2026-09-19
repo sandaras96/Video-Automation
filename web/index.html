@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Studio — Automated YouTube Video Pipeline</title>
+  <meta name="description" content="End-to-end automated YouTube video creation with Gemini Pro, Gemini TTS, Google Flow Omni Flash hooks, 2K illustrations, and 1080p hardware sync.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <div class="app-layout">
+    <!-- TOP NAVBAR -->
+    <header class="navbar" id="app-header">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">ULTRA STUDIO</span>
+          <span class="brand-badge">AUTOMATION PIPELINE</span>
+        </div>
+      </div>
+
+      <div class="nav-status-group">
+        <div class="status-pill" id="cdp-status-pill" title="Chrome DevTools Protocol (Port 9222)">
+          <span class="status-dot" id="cdp-dot"></span>
+          <span class="status-label">Chrome CDP</span>
+          <button class="btn-xs" id="btn-launch-cdp" style="display:none;" title="Launch Chrome with port 9222">Start</button>
+        </div>
+
+        <div class="status-pill" id="api-status-pill" title="Active Gemini API Keys">
+          <span class="status-dot green"></span>
+          <span class="status-label" id="api-keys-count">4 API Keys</span>
+        </div>
+
+        <div class="status-pill" id="hw-status-pill" title="Apple Silicon VideoToolbox Hardware Acceleration">
+          <span class="status-dot green"></span>
+          <span class="status-label">1080p Hardware H.264</span>
+        </div>
+
+        <button class="btn-icon" id="btn-open-settings" title="System Settings">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="studio-body">
+      <!-- LEFT SIDEBAR: PROJECTS & BATCH QUEUE -->
+      <aside class="sidebar" id="queue-sidebar">
+        <div class="sidebar-header">
+          <div class="section-title">
+            <span>Production Queue</span>
+            <span class="badge-count" id="queue-count">0</span>
+          </div>
+          <button class="btn-primary-sm" id="btn-show-creator" title="Create New Project or Batch">
+            + New Video
+          </button>
+        </div>
+
+        <div class="queue-list" id="projects-list">
+          <!-- Populated by JS -->
+          <div class="queue-empty" id="empty-queue-msg">
+            <span class="empty-icon">📁</span>
+            <p>No projects yet.</p>
+            <small>Create a single video or paste a batch of titles to begin.</small>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT MAIN CONTENT -->
+      <main class="main-content" id="main-panel">
+        <!-- VIEW 1: CREATOR / BATCH LAUNCHER -->
+        <section class="card creator-card" id="creator-view">
+          <div class="card-header">
+            <div>
+              <h1 class="card-title">Launch Video Production</h1>
+              <p class="card-subtitle">Generate complete 15–20 min YouTube videos with Gemini Pro scripts, voiceover, 1-min Omni Flash hook videos, 1K/2K illustrations, and 1080p sync.</p>
+            </div>
+            <div class="tab-switch">
+              <button class="tab-btn active" id="tab-single-mode">Single Topic</button>
+              <button class="tab-btn" id="tab-batch-mode">Batch Queue (Multi-Title)</button>
+            </div>
+          </div>
+
+          <div class="creator-form">
+            <!-- Single Mode Input -->
+            <div class="form-group" id="group-single-topic">
+              <label for="input-topic">Video Topic / Title</label>
+              <div class="input-with-icon">
+                <input type="text" id="input-topic" class="form-control" placeholder="e.g. Why I develop cataract while taking hypertension pills? How to avoid that?" autofocus>
+              </div>
+              <small class="hint">The topic will be injected into your master 2,500+ word retention prompt template automatically.</small>
+            </div>
+
+            <!-- Batch Mode Input -->
+            <div class="form-group" id="group-batch-topics" style="display: none;">
+              <label for="input-batch-topics">Paste Multiple Video Titles (One Per Line)</label>
+              <textarea id="input-batch-topics" class="form-control" rows="6" placeholder="Title 1: Why I develop cataract while taking hypertension pills?&#10;Title 2: The Hidden Kidney Risk of Everyday Painkillers&#10;Title 3: 5 Early Signs of Fatty Liver Doctors Miss"></textarea>
+              <small class="hint">The pipeline will create an organized project for each title and process them in sequence.</small>
+            </div>
+
+            <!-- Configuration Grid -->
+            <div class="config-grid">
+              <!-- 1-Minute Hook Videos -->
+              <div class="config-card">
+                <div class="config-header">
+                  <span class="config-title">🎥 1-Minute Visual Hook</span>
+                  <label class="switch">
+                    <input type="checkbox" id="check-hook-enabled" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <p class="config-desc">Generates 7 dynamic 3D animation videos for the first 1 minute (Cold Open + Open Loops) instead of images.</p>
+                <div class="config-field" id="hook-model-container">
+                  <label for="select-hook-model">Video Model:</label>
+                  <select id="select-hook-model" class="form-select">
+                    <option value="omni_flash" selected>Omni 1.1 Flash (15 credits/gen - High Retention)</option>
+                    <option value="veo_3_1_lite">Veo 3.1 Lite (5 credits/gen - Balanced)</option>
+                    <option value="veo_3_1_quality">Veo 3.1 Quality (100 credits/gen - Cinematic)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 1K vs 2K Image Resolution -->
+              <div class="config-card">
+                <div class="config-header">
+                  <span class="config-title">🖼️ Image Resolution</span>
+                  <div class="segmented-control" id="resolution-selector">
+                    <button type="button" class="seg-btn" data-res="1k">1K</button>
+                    <button type="button" class="seg-btn active" data-res="2k">2K</button>
+                  </div>
+                </div>
+                <p class="config-desc" id="res-desc"><b>2K Ultra Quality</b>: Downloads crystal-clear 2K upscaled illustrations from Google Flow for sharp 1080p display.</p>
+                <div class="config-field">
+                  <span class="field-label">Image Model:</span>
+                  <span class="field-value">Nano Banana 2 (0 Credits, FREE!)</span>
+                </div>
+              </div>
+
+              <!-- Voiceover Persona -->
+              <div class="config-card">
+                <div class="config-header">
+                  <span class="config-title">🎙️ Gemini TTS Voice</span>
+                  <span class="badge-accent">Lossless WAV</span>
+                </div>
+                <p class="config-desc">Gemini 2.5 TTS voice persona with 1-min sentence-snapping chunks to prevent audio degradation.</p>
+                <div class="config-field">
+                  <label for="select-tts-voice">Voice Narrator:</label>
+                  <select id="select-tts-voice" class="form-select">
+                    <option value="Leda" selected>Leda (Youthful, Engaging US Female)</option>
+                    <option value="Aoede">Aoede (Authoritative, Clear Female)</option>
+                    <option value="Calliope">Calliope (Warm, Narrative Female)</option>
+                    <option value="Zephyr">Zephyr (Deep, Authoritative Male)</option>
+                    <option value="Orpheus">Orpheus (Calm, Professional Male)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Storage & Organization -->
+              <div class="config-card">
+                <div class="config-header">
+                  <span class="config-title">📁 Project Folder</span>
+                  <div class="folder-header-actions">
+                    <button class="btn-xs" id="btn-reset-folder" type="button" title="Reset to auto-generated folder">Default</button>
+                    <button class="btn-xs btn-browse-action-sm" id="btn-browse-folder" type="button" title="Browse, create or select project folder">📂 Browse...</button>
+                  </div>
+                </div>
+                <p class="config-desc">Each project maintains its own isolated folder with scripts, audio chunks, and 1080p master video.</p>
+                <div class="folder-input-row">
+                  <div class="folder-input-wrapper">
+                    <input type="text" id="input-custom-dir" class="form-control-sm" placeholder="Leave empty for auto: ~/Step By step/projects/...">
+                    <button class="btn-clear-path" id="btn-clear-custom-dir" type="button" title="Clear folder path" style="display: none;">&times;</button>
+                  </div>
+                  <button class="btn-secondary-sm btn-browse-folder-inline" id="btn-browse-folder-inline" type="button" title="Browse, create or select folder">
+                    <span>📂 Browse</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="creator-actions">
+              <button class="btn-primary" id="btn-submit-project">
+                <span class="btn-icon">🚀</span>
+                <span id="btn-submit-label">Start Automation Pipeline</span>
+              </button>
+              <button class="btn-secondary" id="btn-queue-only">
+                <span class="btn-icon">📥</span>
+                <span>Add to Queue Only</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: ACTIVE PROJECT DASHBOARD -->
+        <section class="card project-detail-card" id="project-detail-view" style="display: none;">
+          <div class="detail-header">
+            <div class="detail-title-box">
+              <div class="status-indicator-badge" id="detail-status-badge">QUEUED</div>
+              <h2 class="detail-title" id="detail-title">Topic Title Here</h2>
+              <div class="detail-meta" id="detail-meta">
+                <span id="meta-created">Created: Just now</span>
+                <span class="dot-sep">•</span>
+                <span id="meta-resolution">2K Quality</span>
+                <span class="dot-sep">•</span>
+                <span id="meta-hook">Omni 1.1 Flash Video Hook</span>
+                <span class="dot-sep">•</span>
+                <span id="meta-voice">Voice: Leda</span>
+              </div>
+            </div>
+
+            <div class="detail-actions">
+              <button class="btn-primary-sm" id="btn-run-active" title="Start / Resume Pipeline">
+                ▶ Run Pipeline
+              </button>
+              <button class="btn-danger-sm" id="btn-stop-active" title="Stop Active Process">
+                ⏹ Stop
+              </button>
+              <button class="btn-secondary-sm" id="btn-open-active-dir" title="Open Project Folder in Finder">
+                📂 Finder
+              </button>
+              <button class="btn-secondary-sm" id="btn-delete-active" title="Delete Project">
+                🗑
+              </button>
+            </div>
+          </div>
+
+          <!-- PIPELINE STEPPER -->
+          <div class="pipeline-stepper" id="pipeline-stepper">
+            <!-- Step cards rendered via JS -->
+          </div>
+
+          <!-- SPLIT VIEW: LIVE TERMINAL & MEDIA PREVIEWS -->
+          <div class="detail-split">
+            <!-- LIVE CONSOLE LOGS -->
+            <div class="console-card">
+              <div class="console-header">
+                <div class="console-title">
+                  <span class="terminal-dot red"></span>
+                  <span class="terminal-dot yellow"></span>
+                  <span class="terminal-dot green"></span>
+                  <span>Pipeline Live Terminal</span>
+                </div>
+                <div class="console-actions">
+                  <label class="autoscroll-toggle">
+                    <input type="checkbox" id="check-autoscroll" checked>
+                    <span>Auto-scroll</span>
+                  </label>
+                  <button class="btn-xs" id="btn-clear-logs">Clear</button>
+                </div>
+              </div>
+              <div class="console-terminal" id="terminal-body">
+                <div class="log-line info">Waiting for pipeline execution...</div>
+              </div>
+            </div>
+
+            <!-- MEDIA STUDIO & INSPECTOR -->
+            <div class="media-card">
+              <div class="media-tabs">
+                <button class="media-tab-btn active" data-tab="tab-video">🎬 1080p Video</button>
+                <button class="media-tab-btn" data-tab="tab-audio">🎙️ Voiceover Audio</button>
+                <button class="media-tab-btn" data-tab="tab-visuals">🎥 Video Clips & Images</button>
+                <button class="media-tab-btn" data-tab="tab-script">📄 Generated Script</button>
+              </div>
+
+              <div class="media-body">
+                <!-- Tab 1: Video Player -->
+                <div class="media-tab-pane active" id="pane-video">
+                  <div class="video-container" id="video-wrapper">
+                    <div class="video-placeholder" id="video-placeholder">
+                      <span class="placeholder-icon">🎬</span>
+                      <p>Final 1080p video has not been rendered yet.</p>
+                      <small>It will appear here automatically once Step 6 completes.</small>
+                    </div>
+                    <video id="player-video" controls style="display:none; width: 100%; border-radius: 8px;"></video>
+                  </div>
+                </div>
+
+                <!-- Tab 2: Audio Player -->
+                <div class="media-tab-pane" id="pane-audio">
+                  <div class="audio-container" id="audio-wrapper">
+                    <div class="audio-placeholder" id="audio-placeholder">
+                      <span class="placeholder-icon">🎙️</span>
+                      <p>Voiceover master audio has not been generated yet.</p>
+                    </div>
+                    <div id="audio-player-box" style="display: none;">
+                      <audio id="player-audio" controls style="width: 100%;"></audio>
+                      <div class="audio-meta" id="audio-meta-text">Master 256kbps Voiceover (Leda)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 3: Visuals Gallery -->
+                <div class="media-tab-pane" id="pane-visuals">
+                  <div class="visuals-gallery" id="visuals-gallery">
+                    <p class="empty-gallery-msg">Generated 1-min video clips and 2.5D infographic images will appear here.</p>
+                  </div>
+                </div>
+
+                <!-- Tab 4: Script & Prompts -->
+                <div class="media-tab-pane" id="pane-script">
+                  <div class="script-viewer" id="script-viewer-content">
+                    <p class="empty-script-msg">Generated Gemini Pro script and narration prompts will appear here.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-backdrop" id="settings-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>Studio Settings & Configuration</h2>
+        <button class="modal-close" id="btn-close-settings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cfg-default-profile">Default Chrome Profile</label>
+          <input type="text" id="cfg-default-profile" class="form-control" value="Menaka Gemini Pro">
+        </div>
+        <div class="form-group">
+          <label for="cfg-tts-voice">Default TTS Voice</label>
+          <select id="cfg-tts-voice" class="form-select">
+            <option value="Leda">Leda (Female)</option>
+            <option value="Aoede">Aoede (Female)</option>
+            <option value="Zephyr">Zephyr (Male)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cfg-api-keys">Gemini API Keys Pool (One per line)</label>
+          <textarea id="cfg-api-keys" class="form-control" rows="4"></textarea>
+          <small class="hint">Free keys rotate automatically to avoid daily request limits.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-cancel-settings">Cancel</button>
+        <button class="btn-primary" id="btn-save-settings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLDER BROWSER & CREATOR MODAL -->
+  <div class="modal-backdrop" id="folder-modal" style="display: none;">
+    <div class="modal-dialog folder-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-with-icon">
+          <span class="modal-title-icon">📁</span>
+          <h2>Select or Create Project Folder</h2>
+        </div>
+        <button class="modal-close" id="btn-close-folder-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Native macOS Finder Picker -->
+        <div class="finder-picker-banner">
+          <div class="finder-picker-info">
+            <div class="finder-picker-title">🖥️ macOS Finder Dialog</div>
+            <div class="finder-picker-desc">Open the native Mac folder browser to pick any folder or click its <strong>"New Folder"</strong> button.</div>
+          </div>
+          <button class="btn-primary" id="btn-open-native-finder" type="button">
+            <span class="btn-icon">🗂️</span>
+            <span id="btn-open-native-finder-text">Open Finder</span>
+          </button>
+        </div>
+
+        <div class="modal-divider">
+          <span>OR SELECT / CREATE IN PROJECTS</span>
+        </div>
+
+        <!-- Create New Folder in projects/ -->
+        <div class="create-folder-section">
+          <label class="modal-section-label" for="input-new-folder-name">Create New Folder in <code>projects/</code></label>
+          <div class="create-folder-input-box">
+            <input type="text" id="input-new-folder-name" class="form-control" placeholder="e.g. 5 Early Signs of Fatty Liver">
+            <button class="btn-accent" id="btn-confirm-create-folder" type="button">
+              <span>➕ Create & Select</span>
+            </button>
+          </div>
+          <div class="folder-action-msg" id="folder-create-msg"></div>
+        </div>
+
+        <!-- Existing Folders in projects/ -->
+        <div class="existing-folders-section">
+          <div class="existing-folders-header">
+            <label class="modal-section-label">Existing Project Folders (<span id="folders-count">0</span>)</label>
+            <button class="btn-link-xs" id="btn-refresh-folder-list" type="button">🔄 Refresh</button>
+          </div>
+          <div class="folders-list" id="folders-list">
+            <div class="folders-loading">Loading project folders...</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btn-modal-reset-default" type="button">Reset to Auto Default</button>
+        <button class="btn-secondary" id="btn-cancel-folder-modal" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

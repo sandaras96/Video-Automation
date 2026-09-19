@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AutoFlow Pro — Icon Generator</title>
+<style>
+  body { font-family: system-ui; background: #0D0D14; color: #EEEAFF; padding: 32px; }
+  h2   { margin-bottom: 20px; }
+  .row { display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; }
+  .item { text-align: center; }
+  .item p { margin-top: 6px; font-size: 12px; color: #6B6890; }
+  button {
+    background: linear-gradient(135deg, #7C5CFC, #A78BFA);
+    color: white; border: none; border-radius: 8px;
+    padding: 10px 24px; font-size: 14px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h2>AutoFlow Pro — Icon Generator</h2>
+<p style="color:#6B6890;margin-bottom:20px">Bu sayfayı Chrome'da açın, aşağıdaki butona tıklayın ve 3 ikonu indirin.</p>
+
+<div class="row" id="preview"></div>
+<button onclick="downloadAll()">İkonları İndir (3 dosya)</button>
+
+<script>
+const sizes = [16, 48, 128];
+
+function drawIcon(size) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const r = size * 0.14;
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, size, size);
+  bg.addColorStop(0, '#1C1C2A');
+  bg.addColorStop(1, '#0D0D14');
+  ctx.fillStyle = bg;
+  roundRect(ctx, 0, 0, size, size, r);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = 'rgba(124,92,252,0.4)';
+  ctx.lineWidth = Math.max(1, size * 0.025);
+  roundRect(ctx, ctx.lineWidth/2, ctx.lineWidth/2, size - ctx.lineWidth, size - ctx.lineWidth, r);
+  ctx.stroke();
+
+  // Lightning bolt (centered)
+  const pad = size * 0.18;
+  const cx  = size / 2;
+  const grd = ctx.createLinearGradient(cx - size*0.2, pad, cx + size*0.2, size - pad);
+  grd.addColorStop(0, '#C4B5FD');
+  grd.addColorStop(1, '#7C5CFC');
+  ctx.fillStyle = grd;
+
+  const s = size * 0.38;
+  ctx.beginPath();
+  ctx.moveTo(cx + s*0.15,  pad);
+  ctx.lineTo(cx - s*0.4,   size*0.48);
+  ctx.lineTo(cx + s*0.05,  size*0.48);
+  ctx.lineTo(cx - s*0.15,  size - pad);
+  ctx.lineTo(cx + s*0.4,   size*0.52);
+  ctx.lineTo(cx - s*0.05,  size*0.52);
+  ctx.closePath();
+  ctx.fill();
+
+  return c;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h,     x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y,         x + r, y);
+  ctx.closePath();
+}
+
+// Preview
+const row = document.getElementById('preview');
+sizes.forEach(sz => {
+  const c = drawIcon(sz);
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.appendChild(c);
+  const p = document.createElement('p');
+  p.textContent = sz + 'x' + sz;
+  div.appendChild(p);
+  row.appendChild(div);
+});
+
+function downloadAll() {
+  sizes.forEach(sz => {
+    const c = drawIcon(sz);
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = `icon${sz}.png`;
+    a.click();
+  });
+}
+</script>
+</body>
+</html>

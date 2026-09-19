@@ -1,0 +1,34 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "icons/icon128.png",
+         "16": "icons/icon16.png",
+         "48": "icons/icon48.png"
+      },
+      "default_title": "ViralDNA Auto Flow"
+   },
+   "background": {
+      "service_worker": "background/background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "content/content.js" ],
+      "matches": [ "*://labs.google/*", "*://*.labs.google/*", "*://flow.google.com/*" ],
+      "run_at": "document_idle"
+   } ],
+   "description": "Batch-automate your prompts in Google Flow: queue prompts, auto-attach a reference image, and auto-download every result.",
+   "host_permissions": [ "*://labs.google/*", "*://*.labs.google/*", "*://flow.google.com/*" ],
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxzjW1XAVt0O0/PcNROE254Ylnt+KUU0CI/zJ358XFcMlumneYn01LymhTAvZg64wwq006V68/NIrAxYNPHSkPYol4w3VGT2L4zej0n+Vb3iulQB8yUe8+XLvr9E7q4Ex4hPhn6t194qFQlAIKn0KHbcBP7hzdNlhB2NWhCQ/k+FMO+W8sM0fkJT+gZrDNEy3O+nz/rnZuS+0wH4SzSZKSdqn+8HgJ5KUz4mlwPPJ2py7SupcLUHPWk04ZAIu7G2f8wkXOfkE2VLBXz/I85fQxIcp6u5lBbHC1Rs58LTnY66BeaTCoKSgh6Sg23t8pYf5Q1EdoY1ZWZhmZgz+c8etwIDAQAB",
+   "manifest_version": 3,
+   "name": "ViralDNA Auto Flow",
+   "permissions": [ "storage", "unlimitedStorage", "activeTab", "notifications", "alarms", "scripting", "sidePanel", "downloads", "identity", "power" ],
+   "side_panel": {
+      "default_path": "sidepanel/sidepanel.html"
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.2.51"
+}

@@ -1,0 +1,12 @@
+{
+  "default_profile": "Menaka Gemini Pro",
+  "default_output_file": "generated_gemini_script.txt",
+  "model_target": "Gemini Pro",
+  "tts_voice": "Leda",
+  "tts_model": "gemini-2.5-flash-preview-tts",
+  "gemini_api_key": "YOUR_GEMINI_API_KEY",
+  "gemini_api_keys": [
+    "YOUR_GEMINI_API_KEY_1",
+    "YOUR_GEMINI_API_KEY_2"
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "id": "proj_20260918_225236_7_Hidden_Signs_of_heart_f",
+  "title": "7 Hidden Signs of heart failure",
+  "topic": "7 Hidden Signs of heart failure",
+  "project_dir": "Project 2",
+  "status": "FAILED",
+  "created_at": "2026-09-18T22:52:36.599123",
+  "started_at": "2026-09-18T22:52:36.726088",
+  "completed_at": null,
+  "settings": {
+    "resolution": "1k",
+    "hook_enabled": true,
+    "hook_model": "omni_flash",
+    "hook_count": 7,
+    "voice": "Leda",
+    "tts_model": "gemini-2.5-flash-preview-tts",
+    "profile": null
+  },
+  "current_step": "1_gemini_script",
+  "step_progress": {
+    "1_gemini_script": {
+      "status": "running",
+      "message": "Generating full script with Gemini Pro...",
+      "percent": 10
+    },
+    "2_extract_prompts": {
+      "status": "pending",
+      "message": "Queued",
+      "percent": 0
+    },
+    "3_generate_audio": {
+      "status": "pending",
+      "message": "Queued",
+      "percent": 0
+    },
+    "4_hook_videos": {
+      "status": "pending",
+      "message": "Queued",
+      "percent": 0
+    },
+    "5_flow_images": {
+      "status": "pending",
+      "message": "Queued",
+      "percent": 0
+    },
+    "6_video_sync": {
+      "status": "pending",
+      "message": "Queued",
+      "percent": 0
+    }
+  },
+  "output_files": {
+    "script": null,
+    "narration": null,
+    "image_prompts": null,
+    "hook_prompts": null,
+    "audio_wav": null,
+    "audio_mp3": null,
+    "final_video": null,
+    "hook_videos_count": 0,
+    "images_count": 0
+  },
+  "logs": [
+    {
+      "time": "22:52:36",
+      "text": "\ud83d\ude80 Executing: /opt/homebrew/opt/python@3.14/bin/python3.14 /Users/sandaras/Documents/Step By step/automate_gemini.py --topic 7 Hidden Signs of heart failure --output Project 2/generated_gemini_script.txt",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "Traceback (most recent call last):",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "  File \"/Users/sandaras/Documents/Step By step/automate_gemini.py\", line 363, in <module>",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "    main()",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "    ~~~~^^",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "  File \"/Users/sandaras/Documents/Step By step/automate_gemini.py\", line 343, in main",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "    content = re.sub(r\"TOPIC:\\s*[^\\n]+\", f\"TOPIC: {args.topic}\", content, count=1)",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "              ^^",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "NameError: name 're' is not defined. Did you forget to import 're'?",
+      "level": "info"
+    },
+    {
+      "time": "22:52:36",
+      "text": "\u274c Pipeline failed: Step failed with exit code 1",
+      "level": "error"
+    }
+  ]
+}

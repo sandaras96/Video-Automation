@@ -1,0 +1,9 @@
+{
+  "name": "ultra-video-studio",
+  "version": "1.0.0",
+  "description": "Ultra Video Pipeline Studio Local Web GUI",
+  "scripts": {
+    "dev": "python3 server.py",
+    "start": "python3 server.py"
+  }
+}
