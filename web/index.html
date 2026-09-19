@@ -166,7 +166,7 @@
                   <span class="config-title">📁 Project Folder</span>
                   <div class="folder-header-actions">
                     <button class="btn-xs" id="btn-reset-folder" type="button" title="Reset to auto-generated folder">Default</button>
-                    <button class="btn-xs btn-browse-action-sm" id="btn-browse-folder" type="button" title="Browse, create or select project folder">📂 Browse...</button>
+                    <button class="btn-xs btn-browse-action-sm" id="btn-browse-folder" type="button" title="View existing project folders or create one">📁 Manage Folders</button>
                   </div>
                 </div>
                 <p class="config-desc">Each project maintains its own isolated folder with scripts, audio chunks, and 1080p master video.</p>
@@ -175,10 +175,11 @@
                     <input type="text" id="input-custom-dir" class="form-control-sm" placeholder="Leave empty for auto: ~/Step By step/projects/...">
                     <button class="btn-clear-path" id="btn-clear-custom-dir" type="button" title="Clear folder path" style="display: none;">&times;</button>
                   </div>
-                  <button class="btn-secondary-sm btn-browse-folder-inline" id="btn-browse-folder-inline" type="button" title="Browse, create or select folder">
-                    <span>📂 Browse</span>
+                  <button class="btn-secondary-sm btn-browse-folder-inline" id="btn-browse-folder-inline" type="button" title="Browse and select any folder with macOS Finder">
+                    <span>📂 Browse...</span>
                   </button>
                 </div>
+                <small class="hint folder-hint" id="folder-status-hint">Click <b>📂 Browse...</b> to choose any location on your Mac, or leave empty for auto.</small>
               </div>
             </div>
 

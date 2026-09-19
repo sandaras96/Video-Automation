@@ -763,8 +763,36 @@ document.addEventListener('DOMContentLoaded', () => {
     folderModal.style.display = 'none';
   }
 
+  // Direct Native macOS Finder Browse
+  async function triggerNativeBrowse() {
+    if (btnBrowseFolderInline) {
+      btnBrowseFolderInline.disabled = true;
+      btnBrowseFolderInline.innerHTML = '<span>⏳ Opening...</span>';
+    }
+    try {
+      const res = await fetch('/api/browse-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initial_dir: inputCustomDir.value.trim() })
+      });
+      const data = await res.json();
+      if (data.success && data.path) {
+        inputCustomDir.value = data.path;
+        updateClearBtnVisibility();
+      }
+    } catch (e) {
+      console.error('Error opening Finder picker:', e);
+      openFolderModal();
+    } finally {
+      if (btnBrowseFolderInline) {
+        btnBrowseFolderInline.disabled = false;
+        btnBrowseFolderInline.innerHTML = '<span>📂 Browse...</span>';
+      }
+    }
+  }
+
+  if (btnBrowseFolderInline) btnBrowseFolderInline.addEventListener('click', triggerNativeBrowse);
   if (btnBrowseFolder) btnBrowseFolder.addEventListener('click', openFolderModal);
-  if (btnBrowseFolderInline) btnBrowseFolderInline.addEventListener('click', openFolderModal);
   if (btnCloseFolderModal) btnCloseFolderModal.addEventListener('click', closeFolderModal);
   if (btnCancelFolderModal) btnCancelFolderModal.addEventListener('click', closeFolderModal);
 

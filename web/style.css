@@ -1138,23 +1138,39 @@ input:checked + .slider:before {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
-  font-size: 12px;
+  padding: 7px 14px;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.16) 0%, rgba(157, 78, 221, 0.14) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.4);
   border-radius: var(--radius-sm);
-  color: var(--text-main);
+  color: var(--accent-cyan);
   cursor: pointer;
   transition: var(--transition-fast);
 }
 
 .btn-browse-folder-inline:hover {
-  background: rgba(0, 240, 255, 0.12);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.28) 0%, rgba(157, 78, 221, 0.24) 100%);
   border-color: var(--accent-cyan);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-browse-folder-inline:active {
+  transform: translateY(0);
+}
+
+.folder-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.folder-hint b {
   color: var(--accent-cyan);
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
 }
 
 /* FOLDER MODAL STYLES */
