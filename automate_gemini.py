@@ -128,15 +128,19 @@ def activate_chrome_profile(profile_query=None):
     run_applescript(switch_script)
     time.sleep(0.6)
 
-    # 2. Focus or navigate to Gemini
+    # 2. Focus or navigate to a fresh Gemini chat
     nav_script = '''
     tell application "Google Chrome"
         activate
         set found to false
         repeat with w in windows
-            repeat with t in tabs of w
-                if URL of t contains "gemini.google.com" then
+            set tCount to count of tabs of w
+            repeat with i from 1 to tCount
+                set t to tab i of w
+                if (URL of t) contains "gemini.google.com" then
                     set index of w to 1
+                    set active tab index of w to i
+                    set URL of t to "https://gemini.google.com/app"
                     set found to true
                     exit repeat
                 end if
@@ -150,7 +154,7 @@ def activate_chrome_profile(profile_query=None):
     end tell
     '''
     run_applescript(nav_script)
-    time.sleep(0.8)
+    time.sleep(2.0)
     return chosen_profile
 
 def ensure_gemini_pro():
@@ -281,7 +285,7 @@ def wait_and_copy_response(timeout=240):
             ''')
             time.sleep(0.25)
 
-            # Click native Copy button at verified coordinates: (x1 + 226, y2 - 205)
+            # Click native Copy button at primary coordinates
             copy_x = x1 + 226
             copy_y = y2 - 205
             mouse_click(copy_x, copy_y)
@@ -294,6 +298,29 @@ def wait_and_copy_response(timeout=240):
                     return clip
             except Exception:
                 pass
+
+            # Fallback 1: OCR scan for 'Copy' button if primary coordinate didn't copy
+            ocr_bin = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ocr_helper")
+            if os.path.exists(ocr_bin):
+                try:
+                    cap_file = "/tmp/gemini_copy_cap.png"
+                    subprocess.run(["screencapture", "-x", "-R", f"{x1},{y1},{x2-x1},{y2-y1}", cap_file], check=True)
+                    ocr_res = subprocess.run([ocr_bin, cap_file], capture_output=True, text=True)
+                    for line in ocr_res.stdout.splitlines():
+                        parts = line.split("\t")
+                        if len(parts) >= 5 and "copy" in parts[0].lower():
+                            ox, oy, ow, oh = float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+                            cx = x1 + (ox + ow / 2.0) * (x2 - x1)
+                            cy = y1 + (1.0 - (oy + oh / 2.0)) * (y2 - y1)
+                            mouse_click(cx, cy)
+                            time.sleep(0.3)
+                            clip = subprocess.check_output(["pbpaste"], text=True)
+                            if len(clip.strip()) > 800:
+                                print(f"\n✅ AI generation finished and copied via OCR in {elapsed}s!")
+                                return clip
+                            break
+                except Exception:
+                    pass
 
         time.sleep(1.0)
 
@@ -318,6 +345,14 @@ def save_output(text, out_path=None):
     print(f"📁 Output File: {out_path}")
     print(f"📊 Stats      : {words:,} words | {chars:,} characters")
     print("=" * 55)
+
+def check_cdp_available(port=9222):
+    try:
+        import urllib.request
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/json/version", timeout=1.0) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
 
 def main():
     parser = argparse.ArgumentParser(description="Lightning-fast Gemini Pro Automation.")
@@ -344,16 +379,42 @@ def main():
         content = re.sub(r"TOPIC:\s*[^\n]+", f"TOPIC: {args.topic}", content, count=1)
         print(f"🎯 Configured YouTube Topic: \"{args.topic}\"")
 
-    # 1. Activate Chrome Profile
+    # 1. Primary Engine: Direct Gemini API LLM (Headless, Multi-Key Rotation, Ultra-Fast)
+    try:
+        from gemini_api_llm import generate_script
+        print("🧠 Using Direct Gemini API LLM Engine...")
+        generate_script(args.topic, prompt_file=prompt_file, output_path=args.output)
+        return
+    except Exception as e:
+        print(f"⚠️ Direct Gemini API engine note: {e}. Trying Playwright/CDP...")
+
+    # 2. Secondary Engine: Playwright CDP on port 9222
+    if check_cdp_available(9222):
+        print("🎯 Chrome Remote Debugging (CDP) Detected on port 9222! Using Playwright Engine...")
+        try:
+            from automate_gemini_playwright import GeminiPlaywrightAutomation
+            import asyncio
+            automation = GeminiPlaywrightAutomation(
+                prompt_content=content,
+                output_path=args.output,
+                port=9222
+            )
+            asyncio.run(automation.run())
+            return
+        except Exception as e:
+            print(f"⚠️ Playwright CDP execution encountered an error: {e}. Falling back to native automation...")
+
+    # 3. Tertiary Engine: Native Fallback (AppleScript + Mouse Events)
+    # Activate Chrome Profile
     activate_chrome_profile(args.profile)
 
-    # 2. Ensure Gemini Pro
+    # Ensure Gemini Pro
     ensure_gemini_pro()
 
-    # 3. Inject and Send via Cmd+Return
+    # Inject and Send via Cmd+Return
     inject_and_send_prompt(content)
 
-    # 4. Wait & Copy
+    # Wait & Copy
     res = wait_and_copy_response()
     if res.strip():
         save_output(res, args.output)
@@ -362,3 +423,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

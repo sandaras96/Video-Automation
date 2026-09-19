@@ -209,10 +209,14 @@ class StudioAPIHandler(SimpleHTTPRequestHandler):
             return self.send_json({"success": True, "message": "Pipeline stopped"})
 
         if path == "/api/system/launch-chrome":
-            # Launch Chrome with CDP port 9222
+            # Launch Chrome with CDP port 9222 and dedicated user-data-dir required by modern Chrome
+            chrome_data_dir = os.path.expanduser("~/Library/Application Support/Google/Chrome-Automation")
             subprocess.Popen([
                 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-                "--remote-debugging-port=9222"
+                "--remote-debugging-port=9222",
+                f"--user-data-dir={chrome_data_dir}",
+                "--no-first-run",
+                "--no-default-browser-check"
             ])
             time.sleep(1.5)
             return self.send_json({"success": True, "status": get_system_status()})

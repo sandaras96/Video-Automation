@@ -962,7 +962,11 @@ def main():
 
     if check_cdp_available(9222):
         print("🎯 Chrome Remote Debugging (CDP) Detected on port 9222!")
-        asyncio.run(automation.run_with_cdp())
+        try:
+            asyncio.run(automation.run_with_cdp())
+        except Exception as e:
+            print(f"⚠️ CDP mode encountered an error ({e}). Falling back to native automation...")
+            automation.run_native()
     else:
         automation.run_native()
 
